@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         when {
-            Build.VERSION.SDK_INT < 23 -> download()
-            Build.VERSION.SDK_INT < 30 -> activityResultLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> download()
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.Q -> activityResultLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             else -> download()
         }
     }
@@ -43,12 +43,15 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    @Suppress("SameParameterValue")
     private fun systemDownload(context: Context, fileName: String, url: String) {
         val dm = (context.getSystemService(DOWNLOAD_SERVICE) as DownloadManager)
         val request = DownloadManager.Request(Uri.parse(url))
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-        request.allowScanningByMediaScanner()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            request.allowScanningByMediaScanner()
+        }
         dm.enqueue(request)
     }
 }
